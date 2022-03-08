@@ -1,70 +1,59 @@
-//http://oj.daimayuan.top/course/10/problem/467
+//http://oj.daimayuan.top/course/10/problem/497
 #include <iostream>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
 
 using namespace std;
 
 typedef long long LL;
 
-const int N = 3005, M = 2000005, mod = 1000000007;
+const int N = 300005, M = 32;
 
-int n, m;
-LL fac[M], facinv[M];
-LL f[N];
-struct Point
-{
-    int x, y;
-    bool operator < (const Point& p) const{
-        if (y == p.y)
-            return x < p.x;
-        return y < p.y;
-    }
-}p[N];
+int n;
+int a[N];
+int ch[N * M][2], cnt;
+int id[N][M];
+int s1[N * M], s0[N * M];
 
-LL C(int n, int m)
+void add(int e, int x)
 {
-    return fac[n] * facinv[m] % mod * facinv[n - m] % mod;
-}
-
-LL qpow(LL a, int b)
-{
-    LL res = 1;
-    while (b)
+    int u = 0;
+    for (int i = 31; i >= 0; i -- )
     {
-        if (b & 1) res = res * a % mod;
-        a = a * a % mod;
-        b >>= 1;
+        int v = x >> i & 1;
+        if (ch[u][v] == 0) ch[u][v] = ++ cnt;
+        u = ch[u][v];
+        id[e][i] = u;
     }
-    return res;
 }
 
 int main()
 {
-    scanf("%d%d", &n, &m);
-    for (int i = 1; i <= m; i ++ )
-        scanf("%d%d", &p[i].x, &p[i].y);
-    sort(p + 1, p + 1 + m);
-    p[0] = {1, 1}, p[m + 1] = {n, n};
-
-    fac[0] = facinv[0] = 1;
-    for (int i = 1; i <= 2 * n; i ++ )
-        fac[i] = fac[i - 1] * i % mod;
-    facinv[2 * n] = qpow(fac[2 * n], mod - 2);
-    for (int i = 2 * n - 1; i >= 1; i -- )
-        facinv[i] = facinv[i + 1] * (i + 1) % mod;
-
-    for (int i = 1; i <= m + 1; i ++ )
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i ++ )
     {
-        f[i] = C(p[i].x + p[i].y - 2, p[i].x - 1);
-        for (int j = 1; j < i; j ++ )
-        {
-            if (p[j].x > p[i].x) continue;
-            f[i] = (f[i] - f[j] * C(p[i].x + p[i].y - p[j].x - p[j].y, p[i].x - p[j].x) % mod + mod) % mod;
-        }
+        scanf("%d", &a[i]);
+        add(i, a[i]);
     }
 
-    printf("%lld\n", f[m + 1]);
+    LL ans = 0;
+    int x = 0;
+    for (int i = 31; i >= 0; i -- )
+    {
+        LL c1 = 0, c0 = 0;
+        for (int j = 1; j <= n; j ++ )
+        {
+            int t = id[j][i + 1];
+            if (a[j] & (1 << i))
+                c1 += s0[t], s1[t] ++;
+            else c0 += s1[t], s0[t] ++;
+        }
+
+        if (c1 < c0) ans += c1, x += 1 << i;
+        else ans += c0;
+    }
+
+    printf("%lld %d", ans, x);
 
     return 0;
 }
