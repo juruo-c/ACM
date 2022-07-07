@@ -18,7 +18,26 @@ struct Point
 	}
 }p[N];
 
+bool judge(int x, int y)
+{
+	return x < 1 || x > n || y < 1 || y > m;
+}
 
+int calc(int x, int y, int dx, int dy)
+{
+	int sum = 1;
+	while (true)
+	{
+		if (judge(x + dx, y + dy)) break;
+		if (map[x + dx][y + dy])
+		{
+			sum ++;
+			x += dx, y += dy;
+		}
+		else return 0;
+	}
+	return sum;
+}
 
 int main()
 {
@@ -38,8 +57,12 @@ int main()
 				int dx = p[j].x - p[i].x, dy = p[j].y - p[i].y;
 				if (p[j].x + (ans - 2) * dx > n) break;
 				if (p[j].y + (ans - 2) * dy > m || p[j].y + (ans - 2) * dy < 1) continue;
-				if (judge(p[i].x - dx, p[i].y - dy)) continue;
+				if (!judge(p[i].x - dx, p[i].y - dy)) continue;
+				ans = max(ans, calc(p[i].x, p[i].y, dx, dy));
 			}
+
+		if (ans < 3) puts("0");
+		else printf("%d\n", ans);
 	}
 	return 0;
 }
