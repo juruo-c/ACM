@@ -7,10 +7,10 @@ using namespace std;
 const int N = 1000005;
 
 int l, r;
-int p[N];
-bool vis[N];
 bool st[N];
 
+int p[N];
+bool vis[N];
 void getprime(int n) //获得n范围内的所有素数
 {
 	p[0] = 0;
