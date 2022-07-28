@@ -6,7 +6,8 @@
         "cstdio": "cpp",
         "algorithm": "cpp",
         "utility": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "ostream": "cpp"
     }
     
 
