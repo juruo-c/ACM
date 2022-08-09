@@ -8,13 +8,14 @@
 #include <queue>
 #include <cmath>
 #include <unordered_map>
+#define ZYCMH
 
 using namespace std;
 
 typedef long long LL;
 typedef pair<int, int> PII;
 
-const int N = 1665710, mod = 1000000007;
+const int N = 1664510, mod = 1000000007;
 
 int p[N + 10];
 LL phi[N + 10], miu[N + 10];
@@ -33,7 +34,7 @@ void pre()
             phi[i] = i - 1;
             miu[i] = -1;
         }
-        for (int j = 1; j <= p[0] && 1LL * i * p[j] <= N; j ++ )
+        for (int j = 1; j <= p[0] && i * p[j] <= N; j ++ )
         {
             vis[i * p[j]] = true;
             if (i % p[j] == 0)
@@ -59,12 +60,12 @@ inline int g_sum(int n)
     return n;
 }
 
-LL get_sum_miu(LL n)
+LL get_sum_miu(int n)
 {   
     if (n <= N) return miu[n];
     if (sum_miu[n]) return sum_miu[n];
     LL ans = 1;
-    for (LL l = 2, r; l <= n; l = r + 1)
+    for (int l = 2, r; l <= n; l = r + 1)
     {
         r = n / (n / l);
         ans -= 1LL * (g_sum(r) - g_sum(l - 1)) * get_sum_miu(n / l);
@@ -72,13 +73,12 @@ LL get_sum_miu(LL n)
     return sum_miu[n] = ans / g_sum(1);
 }
 
-LL get_sum_phi(LL n)
+LL get_sum_phi(int n)
 {
-    // cout << n << " " << N << endl;
     if (n <= N) return phi[n];
     if (sum_phi[n]) return sum_phi[n];
     LL ans = 1LL * n * (n + 1) / 2;
-    for (LL l = 2, r; l <= n; l = r + 1)
+    for (int l = 2, r; l <= n; l = r + 1)
     {
         r = n / (n / l);
         ans -= 1LL * (g_sum(r) - g_sum(l - 1)) * get_sum_phi(n / l);
@@ -99,9 +99,7 @@ int main()
     {
         int n;
         scanf("%d", &n);
-        LL t = get_sum_phi(n);
-        LL t2 = get_sum_miu(n);
-        printf("%lld %lld\n", t, t2);
+        printf("%lld %lld\n", get_sum_phi(n), get_sum_miu(n));
     }
     return 0;
 }
