@@ -8,7 +8,8 @@
         "utility": "cpp",
         "random": "cpp",
         "ostream": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "unordered_map": "cpp"
     }
     
 
