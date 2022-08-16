@@ -103,8 +103,6 @@ int main()
         sam.solve(i, s);
     }
 
-    cout << "over" << endl;
-
     int ans = 0;
     for (map<string, int>::iterator it = cnt.begin(); it != cnt.end(); it ++)
         if (it->second == n) ans ++;
