@@ -18,8 +18,8 @@ const int N = 105;
 
 int a[N];
 int b[N];
-LL c[N];
 LL f[N][N];
+LL g[N][N];
 
 int main()
 {
@@ -35,19 +35,30 @@ int main()
     LL ans = 0;
     for (int i = 2; i <= n; i ++ )
         ans += 1LL * (a[i] - a[i - 1]) * (a[i] - a[i - 1]), b[i - 1] = a[i] - a[i - 1];
+    n --;
+
+    // printf("%lld\n", ans);
+
+    for (int i = 1; i <= n; i ++ )
+        for (int j = i + 1; j <= n; j ++ )
+        {
+            LL sum = b[i];
+            for (int k = i + 1; k <= j; k ++ )
+                g[i][j] += sum * b[k], sum += b[k];
+            g[i][j] *= 2;
+        }
     
-    for (int i = 2; i < n; i ++ )
-        c[i - 1] = 1LL * b[i] * b[i + 1];
+    // for (int i = 1; i <= n; i ++ )
+    //     for (int j = i + 1; j <= n; j ++ )
+    //         printf("l = %d r = %d g[i][j] = %lld\n", i, j, g[i][j]);
 
-    for (int i = 1; i < n - 1; i ++ )
-        for (int j = 1; j < n - 1; j ++ )
-            
+    for (int i = 1; i <= n; i ++ )
+        for (int j = 0; j <= i - 1; j ++ )
+            for (int k = 0; k <= j; k ++ )
+                f[i][j] = max(f[i][j], f[i - (k + 1)][j - k] + g[i - k][i]);
 
-    for (int j = 1; j <= n; j ++ )
-    {
-        
-        printf("%lld\n", ans);
-    }   
+    for (int j = 1; j <= n + 1; j ++ )
+        printf("%lld\n", ans + f[n][min(n - 1, j * 2)]);
 
     return 0;
 }
