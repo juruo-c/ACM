@@ -9,7 +9,8 @@
         "random": "cpp",
         "ostream": "cpp",
         "queue": "cpp",
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "cstring": "cpp"
     }
     
 
