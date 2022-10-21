@@ -3,43 +3,61 @@
 
 using namespace std;
 
-typedef pair<double, double> PDD;
+const double eps = 1e-8;
 
-double x1, y1, x2, y2, x3, y3;
-double px, py;
-double S;
-
-bool check(double x1, double y1, double x2, double y2)
+int sgn(double x)
 {
-    if (x1 == x2)
-        return px == x1 && min(y1, y2) <= py && py <= max(y1, y2);
-    else 
+    if (fabs(x) < eps) return 0;
+    else return x < 0 ? -1 : 1;
+}
+
+struct Point
+{
+    double x, y;
+    Point(){}
+    Point(double x, double y):x(x), y(y){}
+    Point operator - (const Point& b) const
     {
-        double k = (y1 - y2) / (x1 - x2);
-        double b = y1 - k * x1;
-        return k * px + b == py && min(y1, y2) <= py && py <= max(y1, y2) && min(x1, x2) <= px && px <= max(x1, x2);
-    }    
-}
+        return Point(x - b.x, y - b.y);
+    }
+}p[5];
 
-double getx(double x1, double x2)
+struct Line
 {
-    return (x1 + x2) / 2;
-}
+    Point p1, p2;
+    Line(){}
+    Line(Point p1, Point p2):p1(p1), p2(p2){}
+}l[5];
 
-double gety(double y1, double y2)
+double Dist(Point a, Point b)
 {
-    return (y1 + y2) / 2;
-}
-
-double getdis(double x1, double y1, double x2, double y2)
-{
-    double dx = x1 - x2, dy = y1 - y2;
+    double dx = a.x - b.x, dy = a.y - b.y;
     return sqrt(dx * dx + dy * dy);
+}
+
+double Dot(Point a, Point b)
+{
+    return a.x * b.x + a.y * b.y;
+}
+
+double Cross(Point a, Point b)
+{
+    return a.x * b.y - a.y * b.x;
+}
+
+bool Point_on_Line(Point P, Line L)
+{
+    return sgn(Cross(P - L.p1, L.p2 - L.p1)) == 0 && sgn(Dot(P - L.p1, P - L.p2)) <= 0;
+}
+
+double getmid(double a, double b)
+{
+    return (a + b) / 2;
 }
 
 struct Node
 {
-    double x1, x2, y1, y2;
+    Point p1, p2;
     double d;
 };
 
@@ -47,43 +65,43 @@ Node solve()
 {
     Node res;
 
-    if (check(x1, y1, x2, y2))
+    if (Point_on_Line(p[4], l[1]))
     {
-        if (2 * getdis(x1, y1, px, py) < getdis(x1, y1, x2, y2))
+        if (Dist(p[1], p[4]) < Dist(p[2], p[4]))
         {
-            res.x1 = x2, res.y1 = y2, res.x2 = x3, res.y2 = y3;
-            res.d = getdis(x1, y1, x2, y2) / getdis(px, py, x2, y2) / 2;
+            res.p1 = p[2], res.p2 = p[3];
+            res.d = Dist(p[1], p[2]) / Dist(p[4], p[2]) / 2;
         }
         else  
         {
-            res.x1 = x1, res.y1 = y1, res.x2 = x3, res.y2 = y3;
-            res.d = getdis(x1, y1, x2, y2) / getdis(px, py, x1, y1) / 2;
+            res.p1 = p[1], res.p2 = p[3];
+            res.d = Dist(p[1], p[2]) / Dist(p[4], p[1]) / 2;
         }
     }
-    else if(check(x1, y1, x3, y3))
+    else if(Point_on_Line(p[4], l[3]))
     {
-        if (2 * getdis(x3, y3, px, py) < getdis(x1, y1, x3, y3))
+        if (Dist(p[3], p[4]) < Dist(p[1], p[4]))
         {
-            res.x1 = x1, res.y1 = y1, res.x2 = x2, res.y2 = y2;
-            res.d = getdis(x1, y1, x3, y3) / getdis(px, py, x1, y1) / 2;
+            res.p1 = p[1], res.p2 = p[2];
+            res.d = Dist(p[1], p[3]) / Dist(p[4], p[1]) / 2;
         }
         else  
         {
-            res.x1 = x3, res.y1 = y3, res.x2 = x2, res.y2 = y2;
-            res.d = getdis(x1, y1, x3, y3) / getdis(px, py, x3, y3) / 2;
+            res.p1 = p[3], res.p2 = p[2];
+            res.d = Dist(p[1], p[3]) / Dist(p[4], p[3]) / 2;
         }
     }
     else 
     {
-        if (2 * getdis(x2, y2, px, py) < getdis(x3, y3, x2, y2))
+        if (Dist(p[2], p[4]) < Dist(p[3], p[4]))
         {
-            res.x1 = x3, res.y1 = y3, res.x2 = x1, res.y2 = y1;
-            res.d = getdis(x3, y3, x2, y2) / getdis(px, py, x3, y3) / 2;
+            res.p1 = p[3], res.p2 = p[1];
+            res.d = Dist(p[2], p[3]) / Dist(p[4], p[3]) / 2;
         }
         else  
         {
-            res.x1 = x2, res.y1 = y2, res.x2 = x1, res.y2 = y1;
-            res.d = getdis(x3, y3, x2, y2) / getdis(px, py, x2, y2) / 2;
+            res.p1 = p[2], res.p2 = p[1];
+            res.d = Dist(p[2], p[3]) / Dist(p[4], p[2]) / 2;
         }
     }
 
@@ -96,52 +114,56 @@ int main()
     scanf("%d", &_);
     while (_ --)
     {
-        scanf("%lf%lf%lf%lf%lf%lf%lf%lf", &x1, &y1, &x2, &y2, &x3, &y3, &px, &py);
-        if (x1 == px && y1 == py)
+        for (int i = 1; i <= 4; i ++ )
+            scanf("%lf%lf", &p[i].x, &p[i].y);
+        if (p[1].x == p[4].x && p[1].y == p[4].y)
         {
-            printf("%.10f %.10f\n", getx(x2, x3), gety(y2, y3));
+            printf("%.10f %.10f\n", getmid(p[2].x, p[3].x), getmid(p[2].y, p[3].y));
             continue;
         }
-        if (x2 == px && y2 == py)
+        if (p[2].x == p[4].x && p[2].y == p[4].y)
         {
-            printf("%.10f %.10f\n", getx(x1, x3), gety(y1, y3));
+            printf("%.10f %.10f\n", getmid(p[1].x, p[3].x), getmid(p[1].y, p[3].y));
             continue;
         }
-        if (x3 == px && y3 == py)
+        if (p[3].x == p[4].x && p[3].y == p[4].y)
         {
-            printf("%.10f %.10f\n", getx(x1, x2), gety(y1, y2));
+            printf("%.10f %.10f\n", getmid(p[1].x, p[2].x), getmid(p[1].y, p[2].y));
             continue;
         }
-        if (!check(x1, y1, x2, y2) && !check(x1, y1, x3, y3) && !check(x2, y2, x3, y3))
+
+        l[1] = Line(p[1], p[2]);
+        l[2] = Line(p[2], p[3]);
+        l[3] = Line(p[3], p[1]);
+
+        if (!Point_on_Line(p[4], l[1]) && !Point_on_Line(p[4], l[2]) && !Point_on_Line(p[4], l[3]))
         {
             puts("-1");
             continue;
         }
 
-        if (check(x1, y1, x2, y2) && px == getx(x1, x2) && py == gety(y1, y2))
+        if (Point_on_Line(p[4], l[1]) && p[4].x == getmid(p[1].x, p[2].x) && p[4].y == getmid(p[1].y, p[2].y))
         {
-            printf("%.10f %.10f\n", x3, y3);
+            printf("%.10f %.10f\n", p[3].x, p[3].y);
             continue;
         }
-
-        if (check(x2, y2, x3, y3) && px == getx(x2, x3) && py == gety(y2, y3))
+        if (Point_on_Line(p[4], l[2]) && p[4].x == getmid(p[3].x, p[2].x) && p[4].y == getmid(p[3].y, p[2].y))
         {
-            printf("%.10f %.10f\n", x1, y1);
+            printf("%.10f %.10f\n", p[1].x, p[1].y);
             continue;
         }
-
-        if (check(x1, y1, x3, y3) && px == getx(x1, x3) && py == gety(y1, y3))
+        if (Point_on_Line(p[4], l[3]) && p[4].x == getmid(p[1].x, p[3].x) && p[4].y == getmid(p[1].y, p[3].y))
         {
-            printf("%.10f %.10f\n", x2, y2);
+            printf("%.10f %.10f\n", p[2].x, p[2].y);
             continue;
         }
         
         Node res = solve();
 
-        x1 = res.x1, y1 = res.y1, x2 = res.x2, y2 = res.y2;
+        Point p1 = res.p1, p2 = res.p2;
         double a = res.d;
 
-        printf("%.10f %.10f\n", x1 + a * (x2 - x1), a * (y2 - y1) + y1);
+        printf("%.10f %.10f\n", a * (p2 - p1).x + p1.x, a * (p2 - p1).y + p1.y);
 
     }
     return 0;
