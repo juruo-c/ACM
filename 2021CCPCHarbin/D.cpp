@@ -1,46 +1,38 @@
 #include <iostream>
-#include <algorithm>
 #include <cstring>
+#include <algorithm>
 
 using namespace std;
 
 typedef long long LL;
 
 LL p, q;
+int n, m;
+int P[20];
+int Q[20];
+int sub[10];
 
 LL gcd(LL a, LL b)
 {
     return !b ? a : gcd(b, a % b);
 }
 
-struct Num
+bool check(LL nq)
 {
-    LL num;
-    int a[20];
-    int b[10];
-    Num(){}
-    Num(LL x) 
+    for (int i = 0; i < m; i ++ )
     {
-        memset(a, 0, sizeof a);
-        num = x;
-        while (x)
+        if (nq && Q[i] == nq % 10)
         {
-            a[++ a[0]] = x % 10;
-            x /= 10;
-        }    
-        
-        for (int i = 0; i < 10; i ++ )
-            b[i] = 0;
-        for (int i = 1; i <= a[0]; i ++ )
-            b[a[i]] ++;
+            nq /= 10;
+            continue;
+        }
+        else if (nq == 0 && Q[i] == 0 && !sub[0]) continue;
+        if (sub[Q[i]])
+            sub[Q[i]] --;
+        else return false;
     }
-};
-
-bool check(Num& P, Num& Q, Num& p, Num& q)
-{
-    for (int i = 1; i <= 9; i ++ )
-        if (p.b[i] - P.b[i] != q.b[i] - Q.b[i])
-            return false;
+    for (int i = 0; i < 10; i ++ )
+        if (sub[i]) return false;
     return true;
 }
 
@@ -48,42 +40,48 @@ int main()
 {
     int _;
     scanf("%d", &_);
-    while (_ --)
+    while(_ --)
     {
         scanf("%lld%lld", &p, &q);
-
-        Num P(p), Q(q);
-
-        LL ansP = p, ansQ = q;
-        int n = P.a[0];
-        for (int i = 1; i < (1 << n); i ++ )
+        LL x = p;
+        n = 0;
+        while (x)
         {
-            LL tmp = 0;
-            for (int j = n - 1; j >= 0; j -- )
-                if (i >> j & 1) tmp = tmp * 10 + P.a[j + 1];
+            P[n ++] = x % 10;
+            x /= 10;
+        }
+        x = q;
+        m = 0;
+        while (x)
+        {
+            Q[m ++] = x % 10;
+            x /= 10;
+        }
+        
+        LL g = gcd(p, q);
+        LL ap = p, aq = q;
+        for (int i = 1; i < (1 << n); i ++)
+        {
+            for (int j = 0; j < 10; j ++ )
+                sub[j] = 0;
             
+            LL newp = 0;
+            for (int j = n - 1; j >= 0; j -- )
+                if (i >> j & 1) newp = newp * 10 + P[j];
+                else sub[P[j]] ++;
+            
+            if (newp == 0) continue;
+            if (newp % (p / g)) continue;
+            
+            LL newq = (newp / (p / g)) * (q / g);
+            if (!check(newq)) continue;
 
-            if (tmp == 0) continue;
-
-            LL t1 = gcd(p, q);
-            LL t2 = gcd(tmp, p / t1);
-
-            if (t1 * t2 != p) continue;
-
-            Num newP(tmp);
-            Num newQ((q / t1) * (tmp / t2));
-
-            if (check(newP, newQ, P, Q))
-            {
-                if (tmp < ansP)
-                {
-                    ansP = tmp;
-                    ansQ = newQ.num;
-                }
-            }
+            ap = min(ap, newp);
+            aq = min(aq, newq);
         }
 
-        printf("%lld %lld\n", ansP, ansQ);
+        printf("%lld %lld\n", ap, aq);
+
     }
     return 0;
 }
