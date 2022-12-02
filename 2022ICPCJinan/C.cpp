@@ -5,16 +5,14 @@ using namespace std;
 const int N = 505, mod = 998244353;
 
 int n;
-struct edge
-{
-    int to, next;
-}e[N << 1];
+vector<int> e[N];
 int head[N], cnt;
 int g[N];
 int siz[N];
 int son[N];
 int f[N][N];
-int h[N][N];
+int h[N][N][N];
+int tmp[N];
 int jc[N];
 
 int qpow(int a, int b)
@@ -29,20 +27,13 @@ int qpow(int a, int b)
     return res;
 }
 
-void add(int u, int v)
-{
-    e[++ cnt] = {v, head[u]};
-    head[u] = cnt;
-}
-
 void dfs1(int u, int ff)
 {
     siz[u] = 1;
     son[u] = 0;
     g[u] = 1;
-    for (int i = head[u]; i; i = e[i].next)
+    for (auto v : e[u])
     {
-        int v = e[i].to;
         if (v == ff) continue;
         dfs1(v, u);
         siz[u] += siz[v];
@@ -54,27 +45,49 @@ void dfs1(int u, int ff)
 
 void dfs2(int u, int ff)
 {
-    if (ff)
+    int sz = 0;
+    int G = 1;
+    for (auto v : e[u])
     {
-        int cnt = 0;
-        for (int i = head[ff]; i; i = e[i].next)
-        {
-            int v = e[i].to;
-            if (v == u) continue;
-            cnt ++;
-            for (int j = 0; j <= n; j ++ )
+        if (v == ff) continue;
+        sz ++;
+        G = 1LL * G * g[v] % mod;
+        for (int j = 0; j <= sz; j ++ )
+            for (int k = 0; k <= n; k ++ )
             {
-                h[cnt][j] = h[cnt - 1][j];
-                if (j >= siz[v]) h[cnt][j] = (h[cnt][j] + 1LL * h[cnt - 1][j - siz[v]] * g[v] % mod) % mod;
+                h[sz][j][k] = h[sz - 1][j][k];
+                if (j && k >= siz[v]) h[sz][j][k] = (h[sz][j][k] + h[sz - 1][j - 1][k - siz[v]]) % mod;
             }
-        }
-        for (int i = 1; i <= n; i ++ )
-            for (int j = 0; j <= n; j ++ )
-                f[u][i + j + 1] = (f[u][i + j + 1] + 1LL * f[ff][i] * h[cnt][j] % mod) % mod;
     }
-    for (int i = head[u]; i; i = e[i].next)
+
+    for (auto v : e[u])
     {
-        int v = e[i].to;
+        if (v == ff) continue;
+        G = 1LL * G * qpow(g[v], mod - 2) % mod;
+
+        for (int j = 1; j <= sz; j ++ )
+            for (int k = siz[v]; k <= n; k ++ ) 
+                h[sz][j][k] = (h[sz][j][k] - h[sz][j - 1][k - siz[v]] + mod) % mod;
+
+        for (int i = 0; i <= n; i ++ ) tmp[i] = 0;
+        for (int j = 0; j <= sz - 1; j ++ )
+            for (int k = 0; k <= n; k ++ )
+                tmp[k] = (tmp[k] + 1LL * h[sz][j][k] * jc[j] % mod * jc[sz - 1 - j] % mod) % mod;
+
+        for (int j = 1; j <= n; j ++ )
+            for (int k = 0; k <= n; k ++ )
+                if (j + k + 1 <= n)
+                    f[v][j + k + 1] = (f[v][j + k + 1] + 1LL * f[u][j] * tmp[k] % mod * G % mod) % mod;
+
+        for (int j = sz; j >= 1; j -- )
+            for (int k = n; k >= siz[v]; k -- )
+                h[sz][j][k] = (h[sz][j][k] + h[sz][j - 1][k - siz[v]]) % mod;
+
+        G = 1LL * G * g[v] % mod;
+    }
+    
+    for (auto v : e[u])
+    {
         if (v == ff) continue;
         dfs2(v, u);
     }
@@ -87,8 +100,8 @@ int main()
     {
         int u, v;
         scanf("%d%d", &u, &v);
-        add(u, v);
-        add(v, u);
+        e[u].push_back(v);
+        e[v].push_back(u);
     }
     jc[0] = 1;
     for (int i = 1; i <= n; i ++ )
@@ -96,16 +109,24 @@ int main()
 
     dfs1(1, 0);
 
-    f[1][1] = 1LL * g[1] * qpow(jc[siz[1]], mod - 2) % mod;
-    h[0][0] = 1;
+    f[1][1] = 1;
+    h[0][0][0] = 1;
     dfs2(1, 0);
 
     for (int i = 1; i <= n; i ++ )
     {
         for (int j = 1; j <= n; j ++ )
-            printf("%d ", 1LL * f[i][j] * jc[siz[i]] % mod);
+            printf("%d ", 1LL * f[i][j] * g[i] % mod);
         puts("");
     }
 
     return 0;
 }
+
+/*
+5
+1 2
+1 3
+3 4
+3 5
+*/
